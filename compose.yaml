@@ -1,0 +1,134 @@
+name: mnop-infra
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  mnop-postgres:
+    image: postgres:17
+    container_name: mnop_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${TZ}
+    expose:
+      - "5432"
+    volumes:
+      - mnop_postgres_data:/var/lib/postgresql/data
+    networks:
+      - mnop_network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging: *default-logging
+
+  mnop-redis:
+    image: redis:7.4-alpine
+    container_name: mnop_redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TZ: ${TZ}
+    command:
+      - sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"
+    expose:
+      - "6379"
+    volumes:
+      - mnop_redis_data:/data
+    networks:
+      - mnop_network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'redis-cli --no-auth-warning -a "$$REDIS_PASSWORD" ping | grep -q PONG'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    logging: *default-logging
+
+  mnop-adminer:
+    image: adminer:latest
+    container_name: mnop_adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: mnop-postgres
+      TZ: ${TZ}
+    ports:
+      - "127.0.0.1:${ADMINER_PORT:-8080}:8080"
+    networks:
+      - mnop_network
+    depends_on:
+      mnop-postgres:
+        condition: service_healthy
+    logging: *default-logging
+
+  mnop-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mnop_backend
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      APP_NAME: "${APP_NAME:-MNOP API}"
+      APP_VERSION: "${APP_VERSION:-0.1.0}"
+      APP_ENV: "${APP_ENV:-development}"
+      APP_DEBUG: "${APP_DEBUG:-true}"
+      API_V1_PREFIX: "${API_V1_PREFIX:-/api/v1}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      POSTGRES_HOST: mnop-postgres
+      POSTGRES_PORT: "5432"
+      REDIS_HOST: mnop-redis
+      REDIS_PORT: "6379"
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+    networks:
+      - mnop_network
+    depends_on:
+      mnop-postgres:
+        condition: service_healthy
+      mnop-redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8000/api/v1/health", timeout=3)'
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *default-logging
+
+volumes:
+  mnop_postgres_data:
+  mnop_redis_data:
+
+networks:
+  mnop_network:
+    driver: bridge
