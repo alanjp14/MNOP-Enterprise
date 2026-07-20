@@ -21,14 +21,14 @@ Sebelum mengubah kode:
 1. Baca struktur repository dan dokumentasi yang relevan.
 2. Jalankan `git status --short`; anggap perubahan yang sudah ada sebagai milik pengguna.
 3. Identifikasi entry point, dependency, integrasi, test, dan migration yang terdampak.
-4. Audit `backend/` versus `mnop-backend/`, `frontend/` versus `mnop-frontend/`, serta `infrastructure/` versus `mnop-infra/`. Tentukan berdasarkan manifest, file terlacak Git, konfigurasi runtime, dan referensi compose apakah masing-masing aktif, lama, kosong, atau duplikat.
+4. Audit kandidat direktori berdasarkan konfigurasi runtime, dependency, entry point, import, dokumentasi, test, migration, dan Git history.
 5. Pertahankan struktur aktif. Jangan menghapus direktori yang diduga duplikat sebelum audit dilaporkan dan persetujuan diberikan.
 
-Kondisi saat panduan ini dibuat: implementasi aktif berada di `backend/`; direktori frontend belum memiliki manifest; root `compose.yaml` adalah compose utama; `mnop-infra/` berisi konfigurasi lama/referensi. Verifikasi ulang karena kondisi dapat berubah.
+Status direktori aktif belum dikonfirmasi. Codex wajib mengaudit `backend/` versus `mnop-backend/`, `frontend/` versus `mnop-frontend/`, serta `infrastructure/` versus `mnop-infra/` berdasarkan `compose.yaml`, `Dockerfile`, dependency, entry point, import, dokumentasi, test, migration, dan Git history sebelum menentukan struktur aktif.
 
 ## Struktur dan Arsitektur
 
-Backend aktif mengikuti pembagian `backend/app/api`, `backend/app/core`, `backend/app/schemas`, dan `backend/app/infrastructure`. Letakkan endpoint dalam router berversi, kontrak request/response dalam schema Pydantic, dan detail database/cache dalam infrastructure. Jaga dependency mengarah ke dalam dan hindari business logic di router.
+Setelah direktori backend aktif dikonfirmasi, pertahankan arsitektur dan struktur yang sudah berjalan. Jangan memindahkan modul sebelum analisis dampak dan persetujuan. Letakkan endpoint dalam router berversi, kontrak request/response dalam schema Pydantic, dan detail database/cache dalam infrastructure sesuai struktur terkonfirmasi. Jaga dependency mengarah ke dalam dan hindari business logic di router.
 
 Frontend harus diorganisasi berdasarkan feature, dengan pemisahan page, reusable component, route, API service, hook, dan type. Hindari komponen monolitik dan duplikasi state server yang seharusnya dikelola TanStack Query.
 
@@ -45,21 +45,21 @@ Setiap fitur wajib mencakup sesuai risikonya:
 - unit/integration test untuk jalur sukses, gagal, dan edge case;
 - dokumentasi API, konfigurasi, migration, dan keputusan arsitektur yang relevan.
 
-Gunakan type annotation lengkap. Untuk Python, ikuti Ruff, strict Mypy, indentasi empat spasi, dan batas 100 karakter dari `backend/pyproject.toml`. Gunakan `snake_case` untuk module/function/variable, `PascalCase` untuk class, dan `UPPER_SNAKE_CASE` untuk constant.
+Gunakan type annotation lengkap. Untuk Python, ikuti konfigurasi Ruff dan Mypy pada backend aktif, indentasi empat spasi, serta batas baris yang ditetapkan konfigurasi proyek. Gunakan `snake_case` untuk module/function/variable, `PascalCase` untuk class, dan `UPPER_SNAKE_CASE` untuk constant.
 
 ## Database dan Migration
 
-Semua perubahan skema PostgreSQL wajib menggunakan revision Alembic baru di `backend/alembic/versions/`. Jangan mengubah migration yang sudah diterapkan; buat migration korektif. Model wajib menggunakan SQLAlchemy 2.x `Mapped` dan `mapped_column`. Pastikan upgrade/downgrade aman, constraint serta index diberi nama konsisten, dan perubahan diuji terhadap PostgreSQL—bukan hanya SQLite.
+Semua perubahan skema PostgreSQL wajib menggunakan revision Alembic baru pada direktori migration backend yang telah dikonfirmasi. Jangan mengubah migration yang sudah diterapkan; buat migration korektif. Model wajib menggunakan SQLAlchemy 2.x `Mapped` dan `mapped_column`. Pastikan upgrade/downgrade aman, constraint serta index diberi nama konsisten, dan perubahan diuji terhadap PostgreSQL—bukan hanya SQLite.
 
 ## Keamanan dan Konfigurasi
 
-Jangan pernah membaca atau menampilkan isi `.env`, password, token, secret key, connection string berkredensial, atau kredensial lain dalam output, log, diff, test fixture, maupun dokumentasi. Gunakan `.env.example` dengan nilai placeholder. Redaksi nilai sensitif jika muncul tidak sengaja. Jangan menonaktifkan security control hanya agar test atau build lulus.
+Jangan pernah membaca atau menampilkan isi `.env`, password, token, secret key, connection string berkredensial, atau kredensial lain dalam output, log, diff, test fixture, maupun dokumentasi. `.env.example` boleh diperiksa hanya untuk nama variabel konfigurasi; jangan menampilkan atau membuat kredensial nyata. Redaksi nilai sensitif jika muncul tidak sengaja. Jangan menonaktifkan security control hanya agar test atau build lulus.
 
 ## Perintah Validasi
 
-Jalankan validasi yang relevan sebelum menyatakan pekerjaan selesai.
+Jalankan validasi yang relevan sebelum menyatakan pekerjaan selesai. Perintah backend atau frontend hanya boleh dijalankan setelah direktori aktif, dependency, konfigurasi, executable, dan script terkait dipastikan tersedia.
 
-Dari `backend/`:
+Dari direktori backend aktif, jika modul dan konfigurasi tool terkait tersedia:
 
 ```powershell
 python -m pytest
@@ -70,9 +70,9 @@ python -m alembic heads
 python -m alembic check
 ```
 
-Untuk perubahan migration, uji `python -m alembic upgrade head` pada database development/test yang aman. Jangan menjalankan downgrade pada database bersama atau production.
+Untuk perubahan migration, uji `python -m alembic upgrade head` hanya jika konfigurasi Alembic dan database development/test yang aman telah dikonfirmasi. Jangan menjalankan downgrade pada database bersama atau production.
 
-Dari direktori frontend aktif, setelah `package.json` tersedia, gunakan package manager sesuai lockfile dan script repository, lalu jalankan ekuivalen berikut:
+Dari direktori frontend aktif, hanya jika `package.json`, dependency, lockfile, dan script terkait tersedia, gunakan package manager repository lalu jalankan ekuivalen berikut:
 
 ```powershell
 npm run lint
@@ -80,7 +80,7 @@ npm run test -- --run
 npm run build
 ```
 
-Jangan mengarang script yang tidak ada; periksa `package.json` terlebih dahulu. Dari root repository, validasi Compose tanpa mencetak konfigurasi atau secret:
+Jangan mengarang script yang tidak ada; periksa `package.json` terlebih dahulu. Jika file Compose aktif dan Docker Compose tersedia, validasi dari lokasi yang sesuai tanpa mencetak konfigurasi atau secret:
 
 ```powershell
 docker compose config --quiet
