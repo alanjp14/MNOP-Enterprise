@@ -139,6 +139,17 @@ export default function DeviceListPage() {
     return matchesSite && matchesSearch;
   });
 
+  // Extract unique site categories and device types for autocomplete
+  const uniqueSiteCategories = Array.from(new Set([
+    ...SITES_CONFIG.filter(s => s.id !== "ALL").map(s => s.id),
+    ...devices.map(d => d.siteCategory)
+  ]));
+
+  const uniqueDeviceTypes = Array.from(new Set([
+    "router", "switch", "radio", "ap", "firewall", "server", "nas", "fingerprint", "printer", "smarttv", "cctv", "ups",
+    ...devices.map(d => d.type)
+  ]));
+
   const getDeviceIcon = (type: NetworkDevice["type"]) => {
     switch (type) {
       case "nas": return <HardDrive className="h-4 w-4 text-purple-500" />;
@@ -179,56 +190,59 @@ export default function DeviceListPage() {
 
   return (
     <div className="w-full max-w-none px-6 py-4 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <Server className="h-6 w-6 text-amber-500" />
-            Device Management & Infrastructure Inventory
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">Pusat Inventaris & Konfigurasi Perangkat Jaringan (Multi-Site Enterprise)</p>
+      {/* Sticky Header Section */}
+      <div className="sticky top-0 z-30 bg-slate-50 dark:bg-slate-950 pb-4 pt-2 -mt-2 space-y-6 border-b border-transparent dark:border-transparent shadow-none">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <Server className="h-6 w-6 text-amber-500" />
+              Device Management & Infrastructure Inventory
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400">Pusat Inventaris & Konfigurasi Perangkat Jaringan (Multi-Site Enterprise)</p>
+          </div>
+
+          <button
+            onClick={handleOpenAddModal}
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-sm shadow-xs transition-all active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            Tambah Device Baru
+          </button>
         </div>
 
-        <button
-          onClick={handleOpenAddModal}
-          className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-sm shadow-xs transition-all active:scale-95"
-        >
-          <Plus className="h-4 w-4" />
-          Tambah Device Baru
-        </button>
-      </div>
+        {/* Multi-Site Selector & Search Bar */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-xs">
+          {/* Site Tabs */}
+          <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl text-xs font-semibold border border-slate-200/80 dark:border-slate-800">
+            <Building2 className="h-4 w-4 text-slate-400 ml-2 mr-1" />
+            {SITES_CONFIG.map((site) => (
+              <button
+                key={site.id}
+                onClick={() => setActiveSiteFilter(site.id)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg transition-colors",
+                  activeSiteFilter === site.id
+                    ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
+              >
+                {site.label}
+              </button>
+            ))}
+          </div>
 
-      {/* Multi-Site Selector & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-xs">
-        {/* Site Tabs */}
-        <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl text-xs font-semibold border border-slate-200/80 dark:border-slate-800">
-          <Building2 className="h-4 w-4 text-slate-400 ml-2 mr-1" />
-          {SITES_CONFIG.map((site) => (
-            <button
-              key={site.id}
-              onClick={() => setActiveSiteFilter(site.id)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg transition-colors",
-                activeSiteFilter === site.id
-                  ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-                  : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-              )}
-            >
-              {site.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Cari Device, IP, Vendor..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Cari Device, IP, Vendor..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
+          </div>
         </div>
       </div>
 
@@ -385,11 +399,11 @@ export default function DeviceListPage() {
                       className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-slate-100"
                     />
                     <datalist id="site-categories">
-                      <option value="BatuahSite">Batuah Site (Mining)</option>
-                      <option value="HeadOffice">Head Office Jakarta</option>
-                      <option value="JettyPort">Jetty / Port</option>
-                      <option value="MessPalangkaraya">Hub Palangkaraya</option>
-                      <option value="MessBuntok">Hub Buntok</option>
+                      {uniqueSiteCategories.map(cat => (
+                        <option key={cat} value={cat}>
+                          {SITES_CONFIG.find(s => s.id === cat)?.label || cat}
+                        </option>
+                      ))}
                     </datalist>
                   </div>
 
@@ -403,18 +417,9 @@ export default function DeviceListPage() {
                       className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-slate-100"
                     />
                     <datalist id="device-types">
-                      <option value="router">Router</option>
-                      <option value="switch">Switch</option>
-                      <option value="radio">Radio Link / PTP</option>
-                      <option value="ap">Access Point (AP)</option>
-                      <option value="firewall">Firewall</option>
-                      <option value="server">Komputer Server</option>
-                      <option value="nas">NAS Storage</option>
-                      <option value="fingerprint">Mesin Absen Fingerprint</option>
-                      <option value="printer">Printer Network</option>
-                      <option value="smarttv">Smart TV Display</option>
-                      <option value="cctv">CCTV NVR / Camera</option>
-                      <option value="ups">UPS Power Unit</option>
+                      {uniqueDeviceTypes.map(t => (
+                        <option key={t} value={t} />
+                      ))}
                     </datalist>
                   </div>
                 </div>
