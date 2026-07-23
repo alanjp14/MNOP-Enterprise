@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ShieldCheck, User, Lock, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
-import { useAuthStore, UserProfile } from "@/stores/auth-store";
+import { useAuthStore, type UserProfile } from "@/stores/auth-store";
 import { fetchApi } from "@/lib/api-client";
 
 export default function LoginPage() {
