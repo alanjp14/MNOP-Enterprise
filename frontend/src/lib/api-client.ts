@@ -3,7 +3,7 @@
  * Intercepts requests and connects to FastAPI Backend endpoints (/api/v1).
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem("mnop_access_token");

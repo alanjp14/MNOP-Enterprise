@@ -9,8 +9,13 @@ export class WebSocketService {
   private reconnectInterval = 5000;
   private url: string;
 
-  constructor(url = "ws://localhost:8000/api/v1/ws/metrics") {
-    this.url = url;
+  constructor(url?: string) {
+    if (url) {
+      this.url = url;
+    } else {
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      this.url = `${wsProtocol}//${window.location.host}/api/v1/ws/metrics`;
+    }
   }
 
   public connect(): void {

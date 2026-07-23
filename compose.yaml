@@ -103,7 +103,7 @@ services:
       - "8000"
       - --reload
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "${BACKEND_PORT:-8001}:8000"
     volumes:
       - ./backend:/app
     networks:
