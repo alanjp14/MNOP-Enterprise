@@ -191,7 +191,7 @@ export default function DeviceListPage() {
   return (
     <div className="w-full max-w-none px-6 py-4 space-y-6">
       {/* Sticky Header Section */}
-      <div className="sticky top-0 z-30 bg-slate-50 dark:bg-slate-950 pb-4 pt-2 -mt-2 space-y-6 border-b border-transparent dark:border-transparent shadow-none">
+      <div className="sticky -top-6 -mx-12 px-12 pt-6 pb-4 z-30 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md space-y-4 border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs">
         {/* Header */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
