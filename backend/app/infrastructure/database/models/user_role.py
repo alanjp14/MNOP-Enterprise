@@ -102,9 +102,7 @@ class UserRole(
             "user_id",
             "role_id",
             unique=True,
-            postgresql_where=text(
-                "site_id IS NULL"
-            ),
+            postgresql_where=text("site_id IS NULL"),
         ),
         Index(
             "uq_user_roles_site_assignment",
@@ -112,9 +110,7 @@ class UserRole(
             "role_id",
             "site_id",
             unique=True,
-            postgresql_where=text(
-                "site_id IS NOT NULL"
-            ),
+            postgresql_where=text("site_id IS NOT NULL"),
         ),
         Index(
             "ix_user_roles_site_id",

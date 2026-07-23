@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import (
 
 from app.core.config import get_settings
 
-
 settings = get_settings()
 
 engine = create_async_engine(
@@ -29,7 +28,7 @@ async_session_factory = async_sessionmaker(
 )
 
 
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_db_session() -> AsyncGenerator[AsyncSession]:
     """Menyediakan satu AsyncSession untuk satu request/use case."""
 
     async with async_session_factory() as session:

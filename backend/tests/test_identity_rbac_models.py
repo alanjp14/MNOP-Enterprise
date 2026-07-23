@@ -32,11 +32,7 @@ def get_constraint_names(
 def get_indexes(model: Any) -> dict[str, Index]:
     """Mengambil index model berdasarkan nama."""
 
-    return {
-        str(index.name): index
-        for index in model.__table__.indexes
-        if index.name is not None
-    }
+    return {str(index.name): index for index in model.__table__.indexes if index.name is not None}
 
 
 def test_identity_tables_registered_in_metadata() -> None:
@@ -52,9 +48,7 @@ def test_identity_tables_registered_in_metadata() -> None:
         "role_permissions",
     }
 
-    assert expected_tables.issubset(
-        set(Base.metadata.tables.keys())
-    )
+    assert expected_tables.issubset(set(Base.metadata.tables.keys()))
 
 
 def test_user_organization_foreign_key() -> None:
@@ -119,22 +113,14 @@ def test_role_partial_unique_indexes() -> None:
     indexes = get_indexes(Role)
 
     system_index = indexes["uq_roles_system_slug"]
-    organization_index = indexes[
-        "uq_roles_organization_id_slug"
-    ]
+    organization_index = indexes["uq_roles_organization_id_slug"]
 
     assert system_index.unique is True
     assert organization_index.unique is True
 
-    assert (
-        system_index.dialect_options["postgresql"]["where"]
-        is not None
-    )
+    assert system_index.dialect_options["postgresql"]["where"] is not None
 
-    assert (
-        organization_index.dialect_options["postgresql"]["where"]
-        is not None
-    )
+    assert organization_index.dialect_options["postgresql"]["where"] is not None
 
 
 def test_role_validation_constraints() -> None:
@@ -149,10 +135,7 @@ def test_role_validation_constraints() -> None:
     assert "ck_roles_slug_not_blank" in check_names
     assert "ck_roles_slug_lowercase" in check_names
     assert "ck_roles_slug_format" in check_names
-    assert (
-        "ck_roles_system_organization_consistency"
-        in check_names
-    )
+    assert "ck_roles_system_organization_consistency" in check_names
 
 
 def test_permission_unique_code() -> None:
@@ -182,9 +165,7 @@ def test_user_role_foreign_keys() -> None:
     user_fk = next(iter(table.c.user_id.foreign_keys))
     role_fk = next(iter(table.c.role_id.foreign_keys))
     site_fk = next(iter(table.c.site_id.foreign_keys))
-    assigned_by_fk = next(
-        iter(table.c.assigned_by.foreign_keys)
-    )
+    assigned_by_fk = next(iter(table.c.assigned_by.foreign_keys))
 
     assert user_fk.target_fullname == "users.id"
     assert user_fk.ondelete == "CASCADE"
@@ -204,91 +185,48 @@ def test_user_role_partial_unique_indexes() -> None:
 
     indexes = get_indexes(UserRole)
 
-    global_index = indexes[
-        "uq_user_roles_global_assignment"
-    ]
+    global_index = indexes["uq_user_roles_global_assignment"]
 
-    site_index = indexes[
-        "uq_user_roles_site_assignment"
-    ]
+    site_index = indexes["uq_user_roles_site_assignment"]
 
     assert global_index.unique is True
     assert site_index.unique is True
 
-    assert (
-        global_index.dialect_options["postgresql"]["where"]
-        is not None
-    )
+    assert global_index.dialect_options["postgresql"]["where"] is not None
 
-    assert (
-        site_index.dialect_options["postgresql"]["where"]
-        is not None
-    )
+    assert site_index.dialect_options["postgresql"]["where"] is not None
 
 
 def test_role_permission_composite_primary_key() -> None:
     """RolePermission menggunakan composite primary key."""
 
-    primary_key_columns = [
-        column.name
-        for column in RolePermission.__table__.primary_key.columns
-    ]
+    primary_key_columns = [column.name for column in RolePermission.__table__.primary_key.columns]
 
     assert primary_key_columns == [
         "role_id",
         "permission_id",
     ]
 
-    assert (
-        RolePermission.__table__.primary_key.name
-        == "pk_role_permissions"
-    )
+    assert RolePermission.__table__.primary_key.name == "pk_role_permissions"
 
 
 def test_identity_relationships_are_bidirectional() -> None:
     """Relasi Identity dan RBAC harus dua arah."""
 
-    assert (
-        Organization.users.property.back_populates
-        == "organization"
-    )
+    assert Organization.users.property.back_populates == "organization"
 
-    assert (
-        User.organization.property.back_populates
-        == "users"
-    )
+    assert User.organization.property.back_populates == "users"
 
-    assert (
-        Organization.roles.property.back_populates
-        == "organization"
-    )
+    assert Organization.roles.property.back_populates == "organization"
 
-    assert (
-        Role.organization.property.back_populates
-        == "roles"
-    )
+    assert Role.organization.property.back_populates == "roles"
 
-    assert (
-        User.role_assignments.property.back_populates
-        == "user"
-    )
+    assert User.role_assignments.property.back_populates == "user"
 
-    assert (
-        Role.user_assignments.property.back_populates
-        == "role"
-    )
+    assert Role.user_assignments.property.back_populates == "role"
 
-    assert (
-        Role.permission_assignments.property.back_populates
-        == "role"
-    )
+    assert Role.permission_assignments.property.back_populates == "role"
 
-    assert (
-        Permission.role_assignments.property.back_populates
-        == "permission"
-    )
+    assert Permission.role_assignments.property.back_populates == "permission"
 
-    assert (
-        Site.user_role_assignments.property.back_populates
-        == "site"
-    )
+    assert Site.user_role_assignments.property.back_populates == "site"

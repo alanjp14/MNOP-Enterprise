@@ -839,15 +839,17 @@ Data audit tidak diperbarui atau dihapus melalui API aplikasi biasa.
 
 ## 13. Migration Plan
 
-Migration akan dibuat dalam urutan berikut:
+Migration dibuat dalam urutan berikut:
 
-1. `20260719_0002_identity_and_rbac.py`
-2. `20260719_0003_device_inventory.py`
-3. `20260719_0004_network_monitoring.py`
-4. `20260719_0005_sla_and_incidents.py`
-5. `20260719_0006_audit_and_indexes.py`
-6. Migration partitioning untuk `check_results`
-7. Migration seed role dan permission awal
+1. `20260719_0001_baseline.py`
+2. `20260719_0002_create_organizations_and_sites.py`
+3. `20260719_0003_create_identity_and_rbac.py`
+4. `20260721_0004_create_device_inventory.py`
+5. `20260721_0005_create_network_monitoring.py`
+6. Migration SLA dan incident
+7. Migration audit dan index lanjutan
+8. Migration partitioning untuk `check_results`
+9. Migration seed role dan permission awal
 
 Setiap migration harus memiliki fungsi `upgrade()` dan `downgrade()` yang lengkap dan dapat diuji.
 

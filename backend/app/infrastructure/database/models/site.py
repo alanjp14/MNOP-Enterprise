@@ -24,6 +24,9 @@ from app.infrastructure.database import (
 )
 
 if TYPE_CHECKING:
+    from app.infrastructure.database.models.device import Device
+    from app.infrastructure.database.models.monitoring_check import MonitoringCheck
+    from app.infrastructure.database.models.network_link import NetworkLink
     from app.infrastructure.database.models.organization import (
         Organization,
     )
@@ -98,6 +101,24 @@ class Site(
         passive_deletes=True,
     )
 
+    devices: Mapped[list["Device"]] = relationship(
+        "Device",
+        back_populates="site",
+        lazy="selectin",
+    )
+
+    network_links: Mapped[list["NetworkLink"]] = relationship(
+        "NetworkLink",
+        back_populates="site",
+        lazy="selectin",
+    )
+
+    monitoring_checks: Mapped[list["MonitoringCheck"]] = relationship(
+        "MonitoringCheck",
+        back_populates="site",
+        lazy="selectin",
+    )
+
     __table_args__ = (
         UniqueConstraint(
             "organization_id",
@@ -117,13 +138,11 @@ class Site(
             name="timezone_not_blank",
         ),
         CheckConstraint(
-            "latitude IS NULL OR "
-            "(latitude >= -90 AND latitude <= 90)",
+            "latitude IS NULL OR (latitude >= -90 AND latitude <= 90)",
             name="latitude_range",
         ),
         CheckConstraint(
-            "longitude IS NULL OR "
-            "(longitude >= -180 AND longitude <= 180)",
+            "longitude IS NULL OR (longitude >= -180 AND longitude <= 180)",
             name="longitude_range",
         ),
         Index(

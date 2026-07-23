@@ -31,9 +31,7 @@ def test_base_uses_constraint_naming_convention() -> None:
     assert naming_convention is not None
     assert naming_convention["pk"] == "pk_%(table_name)s"
     assert naming_convention["fk"] == (
-        "fk_%(table_name)s_"
-        "%(column_0_name)s_"
-        "%(referred_table_name)s"
+        "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s"
     )
 
 

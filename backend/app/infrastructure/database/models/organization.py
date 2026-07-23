@@ -15,6 +15,10 @@ from app.infrastructure.database import (
 )
 
 if TYPE_CHECKING:
+    from app.infrastructure.database.models.device import Device
+    from app.infrastructure.database.models.monitoring_check import MonitoringCheck
+    from app.infrastructure.database.models.monitoring_profile import MonitoringProfile
+    from app.infrastructure.database.models.network_link import NetworkLink
     from app.infrastructure.database.models.role import Role
     from app.infrastructure.database.models.site import Site
     from app.infrastructure.database.models.user import User
@@ -69,6 +73,30 @@ class Organization(
 
     roles: Mapped[list["Role"]] = relationship(
         "Role",
+        back_populates="organization",
+        lazy="selectin",
+    )
+
+    devices: Mapped[list["Device"]] = relationship(
+        "Device",
+        back_populates="organization",
+        lazy="selectin",
+    )
+
+    network_links: Mapped[list["NetworkLink"]] = relationship(
+        "NetworkLink",
+        back_populates="organization",
+        lazy="selectin",
+    )
+
+    monitoring_profiles: Mapped[list["MonitoringProfile"]] = relationship(
+        "MonitoringProfile",
+        back_populates="organization",
+        lazy="selectin",
+    )
+
+    monitoring_checks: Mapped[list["MonitoringCheck"]] = relationship(
+        "MonitoringCheck",
         back_populates="organization",
         lazy="selectin",
     )

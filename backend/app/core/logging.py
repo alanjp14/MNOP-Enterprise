@@ -4,7 +4,6 @@ import sys
 from datetime import UTC, datetime
 from typing import Any
 
-
 _STANDARD_LOG_RECORD_ATTRIBUTES = {
     "args",
     "asctime",

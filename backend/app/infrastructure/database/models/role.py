@@ -125,18 +125,14 @@ class Role(
             "uq_roles_system_slug",
             "slug",
             unique=True,
-            postgresql_where=text(
-                "organization_id IS NULL"
-            ),
+            postgresql_where=text("organization_id IS NULL"),
         ),
         Index(
             "uq_roles_organization_id_slug",
             "organization_id",
             "slug",
             unique=True,
-            postgresql_where=text(
-                "organization_id IS NOT NULL"
-            ),
+            postgresql_where=text("organization_id IS NOT NULL"),
         ),
         Index(
             "ix_roles_organization_id_name",

@@ -1,11 +1,13 @@
 import logging
+from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager
 from time import perf_counter
+from typing import Any
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
@@ -13,14 +15,13 @@ from app.core.logging import configure_logging
 from app.infrastructure.cache.client import close_redis
 from app.infrastructure.database.session import dispose_engine
 
-
 settings = get_settings()
 configure_logging(settings.log_level)
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
     logger.info(
         "application_started",
         extra={
@@ -57,13 +58,15 @@ def create_application() -> FastAPI:
     )
 
     @application.middleware("http")
-    async def request_context_middleware(request: Request, call_next):
+    async def request_context_middleware(
+        request: Request, call_next: Callable[[Request], Any]
+    ) -> Response:
         request_id = request.headers.get("X-Request-ID") or str(uuid4())
         request.state.request_id = request_id
         started_at = perf_counter()
 
         try:
-            response = await call_next(request)
+            response: Response = await call_next(request)
         except Exception:
             logger.exception(
                 "request_failed",
@@ -78,6 +81,14 @@ def create_application() -> FastAPI:
         duration_ms = round((perf_counter() - started_at) * 1000, 2)
         response.headers["X-Request-ID"] = request_id
 
+        # OWASP Enterprise Cyber Security Headers
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; object-src 'none';"
+
         logger.info(
             "request_completed",
             extra={
@@ -91,7 +102,7 @@ def create_application() -> FastAPI:
         return response
 
     @application.exception_handler(Exception)
-    async def unhandled_exception_handler(request: Request, exc: Exception):
+    async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
         request_id = getattr(request.state, "request_id", str(uuid4()))
         logger.exception(
             "unhandled_exception",

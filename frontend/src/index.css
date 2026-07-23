@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Mining Gold / Amber primary palette - full range */
+  --color-primary-50: #fffbeb;
+  --color-primary-100: #fef3c7;
+  --color-primary-200: #fde68a;
+  --color-primary-300: #fcd34d;
+  --color-primary-400: #fbbf24;
+  --color-primary-500: #f59e0b;
+  --color-primary-600: #d97706;
+  --color-primary-700: #b45309;
+  --color-primary-800: #92400e;
+  --color-primary-900: #78350f;
+  --color-primary-950: #451a03;
+
+  /* Accent emerald for UP/online status */
+  --color-accent-50: #ecfdf5;
+  --color-accent-100: #d1fae5;
+  --color-accent-200: #a7f3d0;
+  --color-accent-300: #6ee7b7;
+  --color-accent-400: #34d399;
+  --color-accent-500: #10b981;
+  --color-accent-600: #059669;
+
+  /* Danger rose/red for DOWN/offline */
+  --color-danger-50: #fff1f2;
+  --color-danger-100: #ffe4e6;
+  --color-danger-200: #fecdd3;
+  --color-danger-300: #fda4af;
+  --color-danger-400: #fb7185;
+  --color-danger-500: #f43f5e;
+  --color-danger-600: #e11d48;
+
+  /* Warning orange */
+  --color-warning-50: #fff7ed;
+  --color-warning-100: #ffedd5;
+  --color-warning-200: #fed7aa;
+  --color-warning-300: #fdba74;
+  --color-warning-400: #fb923c;
+  --color-warning-500: #f97316;
+  --color-warning-600: #ea580c;
+
+  /* Surface and background colors */
+  --color-surface-light: #ffffff;
+  --color-surface-dark: #0f172a;
+  --color-background-light: #f8fafc;
+  --color-background-dark: #020617;
+
+  /* Typography */
+  --font-sans: Inter, Segoe UI, Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Map CSS variables to Tailwind color utilities */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Map Border Radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Animations */
+  --animate-slide-in: slide-in 0.3s ease-out forwards;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out forwards;
+  --animate-shimmer: shimmer 2s infinite linear;
+  --animate-pulse-ring: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite;
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+  
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  @keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 5px var(--primary)); }
+    50% { filter: drop-shadow(0 0 15px var(--primary)); }
+  }
+}
+
+@layer base {
+  :root {
+    --background: var(--color-background-light);
+    --foreground: #0f172a;
+    --card: var(--color-surface-light);
+    --card-foreground: #0f172a;
+    --primary: var(--color-primary-600);
+    --primary-foreground: #ffffff;
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: var(--color-primary-500);
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: var(--color-background-dark);
+    --foreground: #f8fafc;
+    --card: var(--color-surface-dark);
+    --card-foreground: #f8fafc;
+    --primary: var(--color-primary-500);
+    --primary-foreground: #ffffff;
+    --border: #1e293b;
+    --input: #1e293b;
+    --ring: var(--color-primary-400);
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased transition-colors duration-300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/50 shadow-sm;
+  }
+  
+  .card-base {
+    @apply bg-card text-card-foreground border border-border rounded-[var(--radius)] shadow-sm transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-md hover:-translate-y-0.5 hover:border-primary/50 transition-all duration-300;
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-warning-500 dark:from-primary-400 dark:to-warning-400;
+  }
+
+  /* Premium Custom Scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary-300) transparent;
+  }
+  
+  .dark .scrollbar-thin {
+    scrollbar-color: var(--color-primary-700) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-primary-300);
+    border-radius: 20px;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-primary-700);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-primary-400);
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-primary-600);
+  }
+}

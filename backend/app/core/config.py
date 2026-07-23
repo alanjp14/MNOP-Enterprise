@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     postgres_port: int = 5432
     postgres_db: str = "mnop_db"
     postgres_user: str = "mnop_user"
-    postgres_password: SecretStr
+    postgres_password: SecretStr = SecretStr("mnop_dev_password")
 
     database_pool_size: int = 10
     database_max_overflow: int = 20
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     redis_host: str = "mnop-redis"
     redis_port: int = 6379
     redis_database: int = 0
-    redis_password: SecretStr
+    redis_password: SecretStr = SecretStr("mnop_dev_redis_password")
     redis_socket_timeout: int = 5
 
     model_config = SettingsConfigDict(
@@ -67,10 +67,7 @@ class Settings(BaseSettings):
     @property
     def redis_url(self) -> str:
         password = quote_plus(self.redis_password.get_secret_value())
-        return (
-            f"redis://:{password}@{self.redis_host}:"
-            f"{self.redis_port}/{self.redis_database}"
-        )
+        return f"redis://:{password}@{self.redis_host}:{self.redis_port}/{self.redis_database}"
 
 
 @lru_cache(maxsize=1)

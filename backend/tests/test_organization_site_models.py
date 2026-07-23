@@ -25,11 +25,7 @@ def get_index_names(
 ) -> set[str | None]:
     """Mengambil seluruh nama index model."""
 
-    return {
-        index.name
-        for index in model.__table__.indexes
-        if isinstance(index, Index)
-    }
+    return {index.name for index in model.__table__.indexes if isinstance(index, Index)}
 
 
 def test_models_are_registered_in_base_metadata() -> None:
