@@ -19,5 +19,24 @@ class UserResponse(BaseModel):
     full_name: str
     role: str
     organization: str
+    is_active: bool = True
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserCreateRequest(BaseModel):
+    username: str = Field(..., min_length=3)
+    email: EmailStr | str
+    full_name: str
+    password: str = Field(..., min_length=6)
+    role: str = Field(..., description="Administrator, NOC Operator, atau User Only")
+    organization: str = "PT Kapuas Bara Utama"
+
+
+class UserUpdateRequest(BaseModel):
+    full_name: str | None = None
+    email: EmailStr | str | None = None
+    role: str | None = None
+    is_active: bool | None = None
+    password: str | None = None
+
