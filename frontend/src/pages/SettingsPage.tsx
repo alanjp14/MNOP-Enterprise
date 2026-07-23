@@ -20,6 +20,8 @@ import {
   Trash2,
   X,
   Key,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { playDownSound, playUpSound } from "@/utils/sound-alerts";
@@ -35,48 +37,76 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"org" | "probes" | "audio" | "security" | "users">("users");
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // User Management State
-  const [userList, setUserList] = useState<UserAccount[]>([
-    {
-      id: "usr-1",
-      username: "admin_kbu",
-      email: "admin.kbu@kapuasbara.co.id",
-      full_name: "Alan Jalu (Owner & Super Admin)",
-      role: "Administrator",
-      organization: "PT Kapuas Bara Utama",
-      is_active: true,
-    },
-    {
-      id: "usr-2",
-      username: "noc_lead",
-      email: "noc.lead@kapuasbara.co.id",
-      full_name: "Rizki Maulana (NOC Lead)",
-      role: "NOC Operator",
-      organization: "PT Kapuas Bara Utama",
-      is_active: true,
-    },
-    {
-      id: "usr-3",
-      username: "auditor_site",
-      email: "auditor@kapuasbara.co.id",
-      full_name: "Site Manager (Auditor)",
-      role: "User Only",
-      organization: "PT Kapuas Bara Utama",
-      is_active: true,
-    },
-  ]);
+  // User Management State with LocalStorage persistence fallback
+  const [userList, setUserList] = useState<UserAccount[]>(() => {
+    const saved = localStorage.getItem("mnop_user_accounts");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+    return [
+      {
+        id: "usr-1",
+        username: "admin_kbu",
+        email: "admin.kbu@kapuasbara.co.id",
+        full_name: "Alan Jalu (Owner & Super Admin)",
+        role: "Administrator",
+        organization: "PT Kapuas Bara Utama",
+        is_active: true,
+      },
+      {
+        id: "usr-2",
+        username: "noc_lead",
+        email: "noc.lead@kapuasbara.co.id",
+        full_name: "Rizki Maulana (NOC Lead)",
+        role: "NOC Operator",
+        organization: "PT Kapuas Bara Utama",
+        is_active: true,
+      },
+      {
+        id: "usr-3",
+        username: "auditor_site",
+        email: "auditor@kapuasbara.co.id",
+        full_name: "Site Manager (Auditor)",
+        role: "User Only",
+        organization: "PT Kapuas Bara Utama",
+        is_active: true,
+      },
+    ];
+  });
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [newFullName, setNewFullName] = useState("");
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [newRole, setNewRole] = useState<"Administrator" | "NOC Operator" | "User Only">("NOC Operator");
   const [userActionMsg, setUserActionMsg] = useState("");
+
+  const updateAndSaveUsers = (newUsers: UserAccount[]) => {
+    setUserList(newUsers);
+    try {
+      localStorage.setItem("mnop_user_accounts", JSON.stringify(newUsers));
+    } catch {}
+  };
 
   useEffect(() => {
     fetchUsers()
       .then((data) => {
-        if (data && data.length > 0) setUserList(data);
+        if (data && data.length > 0) {
+          setUserList((prev) => {
+            const map = new Map<string, UserAccount>();
+            prev.forEach((u) => map.set(u.id, u));
+            data.forEach((u) => map.set(u.id, u));
+            const merged = Array.from(map.values());
+            try {
+              localStorage.setItem("mnop_user_accounts", JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
+        }
       })
       .catch(() => {});
   }, []);
@@ -87,18 +117,18 @@ export default function SettingsPage() {
       alert("Harap isi seluruh kolom pendaftaran!");
       return;
     }
+    
+    let createdUser: UserAccount;
     try {
-      const created = await createUser({
+      createdUser = await createUser({
         full_name: newFullName,
         username: newUsername,
         email: newEmail,
         password: newPassword,
         role: newRole,
       });
-      setUserList((prev) => [...prev, created]);
-      setUserActionMsg(`Akun ${newUsername} (${newRole}) berhasil dibuat!`);
     } catch {
-      const fallbackUser: UserAccount = {
+      createdUser = {
         id: `usr-${Date.now()}`,
         username: newUsername.toLowerCase(),
         email: newEmail,
@@ -107,15 +137,18 @@ export default function SettingsPage() {
         organization: "PT Kapuas Bara Utama",
         is_active: true,
       };
-      setUserList((prev) => [...prev, fallbackUser]);
-      setUserActionMsg(`Akun ${newUsername} (${newRole}) berhasil dibuat!`);
     }
+
+    const updated = [...userList, createdUser];
+    updateAndSaveUsers(updated);
+    setUserActionMsg(`Akun ${newUsername} (${newRole}) berhasil dibuat!`);
 
     setIsUserModalOpen(false);
     setNewFullName("");
     setNewUsername("");
     setNewEmail("");
     setNewPassword("");
+    setShowPassword(false);
     setNewRole("NOC Operator");
     setTimeout(() => setUserActionMsg(""), 3500);
   };
@@ -127,7 +160,8 @@ export default function SettingsPage() {
     } catch {
       // fallback local
     }
-    setUserList((prev) => prev.filter((u) => u.id !== id));
+    const updated = userList.filter((u) => u.id !== id);
+    updateAndSaveUsers(updated);
     setUserActionMsg(`Akun ${username} telah dihapus.`);
     setTimeout(() => setUserActionMsg(""), 3500);
   };
@@ -141,9 +175,8 @@ export default function SettingsPage() {
     } catch {
       // fallback
     }
-    setUserList((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, role: nextRole } : u))
-    );
+    const updated = userList.map((u) => (u.id === id ? { ...u, role: nextRole } : u));
+    updateAndSaveUsers(updated);
     setUserActionMsg(`Hak akses pengguna berhasil diubah ke ${nextRole}`);
     setTimeout(() => setUserActionMsg(""), 3500);
   };
@@ -1042,14 +1075,24 @@ export default function SettingsPage() {
 
                 <div>
                   <label className="block text-slate-700 dark:text-slate-300 mb-1">Kata Sandi (Password)</label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+                      title={showPassword ? "Sembunyikan Kata Sandi" : "Tampilkan Kata Sandi"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
