@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import get_current_user
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.infrastructure.database.models.user import User
 from app.infrastructure.database.session import get_db_session
@@ -201,36 +202,33 @@ async def login(
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_profile(
-    db: AsyncSession = Depends(get_db_session),
+    current_user: dict = Depends(get_current_user),
 ) -> UserResponse:
     """Returns currently authenticated user profile."""
-    # Attempt DB first
-    try:
-        stmt = select(User).where(User.username == "admin_kbu")
-        res = await db.execute(stmt)
-        user_obj = res.scalar_one_or_none()
-        if user_obj:
-            org_name = user_obj.organization.name if user_obj.organization else "PT Kapuas Bara Utama"
-            return UserResponse(
-                id=str(user_obj.id),
-                username=user_obj.username,
-                email=user_obj.email,
-                full_name=user_obj.full_name,
-                role="admin" if user_obj.is_superuser else "operator",
-                organization=org_name,
-            )
-    except Exception:
-        pass
-
-    # Fallback to mock
-    user = MOCK_USERS["admin_kbu"]
+    if current_user.get("is_mock"):
+        user = MOCK_USERS.get(current_user["id"])
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return UserResponse(
+            id=user["id"],
+            username=user["username"],
+            email=user["email"],
+            full_name=user["full_name"],
+            role=user["role"],
+            organization=user["organization"],
+            is_active=user["is_active"],
+        )
+        
+    user_obj = current_user["user_obj"]
+    org_name = user_obj.organization.name if user_obj.organization else "PT Kapuas Bara Utama"
     return UserResponse(
-        id=user["id"],
-        username=user["username"],
-        email=user["email"],
-        full_name=user["full_name"],
-        role=user["role"],
-        organization=user["organization"],
+        id=str(user_obj.id),
+        username=user_obj.username,
+        email=user_obj.email,
+        full_name=user_obj.full_name,
+        role="Administrator" if user_obj.is_superuser else "NOC Operator",
+        organization=org_name,
+        is_active=user_obj.is_active,
     )
 
 

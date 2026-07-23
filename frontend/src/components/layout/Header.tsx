@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Menu, Bell, PanelLeft, Calendar, Clock, Maximize2, Minimize2 } from "lucide-react";
+import { Menu, Bell, PanelLeft, Calendar, Clock, Maximize2, Minimize2, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale/id";
 import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils";
 import { playDownSound } from "@/utils/sound-alerts";
+import { useAuthStore } from "@/stores/auth-store";
 
 const routeNames: Record<string, string> = {
   "/": "Dashboard",
@@ -30,6 +31,7 @@ export function Header({ onMenuClick, onToggleSidebar, isSidebarHidden }: Header
   const location = useLocation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { user, logout } = useAuthStore();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -146,15 +148,24 @@ export function Header({ onMenuClick, onToggleSidebar, isSidebarHidden }: Header
         <div className="hidden sm:block h-7 w-px bg-slate-200 dark:bg-slate-700"></div>
 
         {/* User profile */}
-        <button className="flex items-center gap-2.5 py-1 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-slate-900 font-bold text-xs shadow-md shadow-amber-500/20">
-            AD
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 py-1 px-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-slate-900 font-bold text-xs shadow-md shadow-amber-500/20">
+              {user?.full_name ? user.full_name.substring(0, 2).toUpperCase() : "U"}
+            </div>
+            <div className="hidden md:flex flex-col items-start mr-2">
+              <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">{user?.full_name || "Unknown"}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{user?.role || "User"}</span>
+            </div>
           </div>
-          <div className="hidden md:flex flex-col items-start">
-            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">Admin KBU</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">IT Network Engineer</span>
-          </div>
-        </button>
+          <button 
+            onClick={logout}
+            className="p-2 rounded-full text-slate-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            title="Keluar (Logout)"
+          >
+            <LogOut className="h-5 w-5" />
+          </button>
+        </div>
       </div>
     </header>
   );
