@@ -188,7 +188,7 @@ async def login(
         return TokenResponse(access_token=access_token, token_type="bearer", expires_in=86400)
 
     # 2. Fallback to mock user for dev/demo mode
-    fallback_user = MOCK_USERS.get(credentials.username)
+    fallback_user = next((u for u in MOCK_USERS.values() if u["username"] == credentials.username.lower()), None)
     if fallback_user and verify_password(credentials.password, fallback_user["password_hash"]):
         access_token = create_access_token(subject=fallback_user["id"])
         return TokenResponse(access_token=access_token, token_type="bearer", expires_in=86400)
