@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LoginRequest(BaseModel):
@@ -15,7 +15,7 @@ class TokenResponse(BaseModel):
 class UserResponse(BaseModel):
     id: str
     username: str
-    email: EmailStr | str
+    email: str
     full_name: str
     role: str
     organization: str
@@ -26,7 +26,7 @@ class UserResponse(BaseModel):
 
 class UserCreateRequest(BaseModel):
     username: str = Field(..., min_length=3)
-    email: EmailStr | str
+    email: str
     full_name: str
     password: str = Field(..., min_length=6)
     role: str = Field(..., description="Administrator, NOC Operator, atau User Only")
@@ -35,8 +35,9 @@ class UserCreateRequest(BaseModel):
 
 class UserUpdateRequest(BaseModel):
     full_name: str | None = None
-    email: EmailStr | str | None = None
+    email: str | None = None
     role: str | None = None
     is_active: bool | None = None
     password: str | None = None
+
 
