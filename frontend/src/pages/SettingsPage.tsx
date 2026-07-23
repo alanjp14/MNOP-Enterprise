@@ -22,6 +22,7 @@ import {
   Key,
   Eye,
   EyeOff,
+  Edit2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { playDownSound, playUpSound } from "@/utils/sound-alerts";
@@ -84,6 +85,17 @@ export default function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [newRole, setNewRole] = useState<"Administrator" | "NOC Operator" | "User Only">("NOC Operator");
   const [userActionMsg, setUserActionMsg] = useState("");
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+
+  const handleOpenEditUser = (user: UserAccount) => {
+    setEditingUserId(user.id);
+    setNewFullName(user.full_name);
+    setNewUsername(user.username);
+    setNewEmail(user.email);
+    setNewRole(user.role as any);
+    setNewPassword("");
+    setIsUserModalOpen(true);
+  };
 
   const updateAndSaveUsers = (newUsers: UserAccount[]) => {
     setUserList(newUsers);
@@ -113,37 +125,62 @@ export default function SettingsPage() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUsername || !newPassword || !newFullName || !newEmail) {
+    if (!newUsername || !newFullName || !newEmail) {
       alert("Harap isi seluruh kolom pendaftaran!");
       return;
     }
+    if (!editingUserId && !newPassword) {
+      alert("Harap isi kata sandi untuk pengguna baru!");
+      return;
+    }
     
-    let createdUser: UserAccount;
-    try {
-      createdUser = await createUser({
+    if (editingUserId) {
+      try {
+        await updateUser(editingUserId, {
+          full_name: newFullName,
+          email: newEmail,
+          role: newRole,
+          ...(newPassword ? { password: newPassword } : {})
+        });
+      } catch {}
+      const updated = userList.map(u => u.id === editingUserId ? {
+        ...u,
         full_name: newFullName,
         username: newUsername,
         email: newEmail,
-        password: newPassword,
         role: newRole,
-      });
-    } catch {
-      createdUser = {
-        id: `usr-${Date.now()}`,
-        username: newUsername.toLowerCase(),
-        email: newEmail,
-        full_name: newFullName,
-        role: newRole,
-        organization: "PT Kapuas Bara Utama",
-        is_active: true,
-      };
+      } : u);
+      updateAndSaveUsers(updated);
+      setUserActionMsg(`Akun ${newUsername} berhasil diperbarui!`);
+    } else {
+      let createdUser: UserAccount;
+      try {
+        createdUser = await createUser({
+          full_name: newFullName,
+          username: newUsername,
+          email: newEmail,
+          password: newPassword,
+          role: newRole,
+        });
+      } catch {
+        createdUser = {
+          id: `usr-${Date.now()}`,
+          username: newUsername.toLowerCase(),
+          email: newEmail,
+          full_name: newFullName,
+          role: newRole,
+          organization: "PT Kapuas Bara Utama",
+          is_active: true,
+        };
+      }
+
+      const updated = [...userList, createdUser];
+      updateAndSaveUsers(updated);
+      setUserActionMsg(`Akun ${newUsername} (${newRole}) berhasil dibuat!`);
     }
 
-    const updated = [...userList, createdUser];
-    updateAndSaveUsers(updated);
-    setUserActionMsg(`Akun ${newUsername} (${newRole}) berhasil dibuat!`);
-
     setIsUserModalOpen(false);
+    setEditingUserId(null);
     setNewFullName("");
     setNewUsername("");
     setNewEmail("");
@@ -183,24 +220,37 @@ export default function SettingsPage() {
 
 
   // Form State
-  const [orgName, setOrgName] = useState("PT Kapuas Bara Utama");
-  const [timezone, setTimezone] = useState("Asia/Makassar");
-  const [refreshInterval, setRefreshInterval] = useState("3000");
+  const [orgName, setOrgName] = useState(() => localStorage.getItem("mnop_orgName") || "PT Kapuas Bara Utama");
+  const [timezone, setTimezone] = useState(() => localStorage.getItem("mnop_timezone") || "Asia/Makassar");
+  const [refreshInterval, setRefreshInterval] = useState(() => localStorage.getItem("mnop_refreshInterval") || "3000");
 
-  const [pingInterval, setPingInterval] = useState("3");
-  const [targetWanSla, setTargetWanSla] = useState("99.5");
-  const [targetSwitchSla, setTargetSwitchSla] = useState("99.9");
-  const [warningLatency, setWarningLatency] = useState("60");
-  const [criticalLatency, setCriticalLatency] = useState("120");
+  const [pingInterval, setPingInterval] = useState(() => localStorage.getItem("mnop_pingInterval") || "3");
+  const [targetWanSla, setTargetWanSla] = useState(() => localStorage.getItem("mnop_targetWanSla") || "99.5");
+  const [targetSwitchSla, setTargetSwitchSla] = useState(() => localStorage.getItem("mnop_targetSwitchSla") || "99.9");
+  const [warningLatency, setWarningLatency] = useState(() => localStorage.getItem("mnop_warningLatency") || "60");
+  const [criticalLatency, setCriticalLatency] = useState(() => localStorage.getItem("mnop_criticalLatency") || "120");
 
-  const [audioEnabled, setAudioEnabled] = useState(true);
-  const [soundVolume, setSoundVolume] = useState("80");
+  const [audioEnabled, setAudioEnabled] = useState(() => localStorage.getItem("mnop_audioEnabled") !== "false");
+  const [soundVolume, setSoundVolume] = useState(() => localStorage.getItem("mnop_soundVolume") || "80");
 
-  const [mikrotikApiPort, setMikrotikApiPort] = useState("8728");
-  const [tokenExpiry, setTokenExpiry] = useState("8");
+  const [mikrotikApiPort, setMikrotikApiPort] = useState(() => localStorage.getItem("mnop_mikrotikApiPort") || "8728");
+  const [tokenExpiry, setTokenExpiry] = useState(() => localStorage.getItem("mnop_tokenExpiry") || "8");
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.setItem("mnop_orgName", orgName);
+    localStorage.setItem("mnop_timezone", timezone);
+    localStorage.setItem("mnop_refreshInterval", refreshInterval);
+    localStorage.setItem("mnop_pingInterval", pingInterval);
+    localStorage.setItem("mnop_targetWanSla", targetWanSla);
+    localStorage.setItem("mnop_targetSwitchSla", targetSwitchSla);
+    localStorage.setItem("mnop_warningLatency", warningLatency);
+    localStorage.setItem("mnop_criticalLatency", criticalLatency);
+    localStorage.setItem("mnop_audioEnabled", audioEnabled.toString());
+    localStorage.setItem("mnop_soundVolume", soundVolume);
+    localStorage.setItem("mnop_mikrotikApiPort", mikrotikApiPort);
+    localStorage.setItem("mnop_tokenExpiry", tokenExpiry);
+    
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2500);
   };
@@ -901,7 +951,15 @@ export default function SettingsPage() {
 
               <button
                 type="button"
-                onClick={() => setIsUserModalOpen(true)}
+                onClick={() => {
+                  setEditingUserId(null);
+                  setNewFullName("");
+                  setNewUsername("");
+                  setNewEmail("");
+                  setNewPassword("");
+                  setNewRole("NOC Operator");
+                  setIsUserModalOpen(true);
+                }}
                 className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-4 py-2 rounded-xl shadow-md transition-all active:scale-95 text-xs"
               >
                 <UserPlus className="h-4 w-4" />
@@ -964,14 +1022,24 @@ export default function SettingsPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteUser(user.id, user.username)}
-                            className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-colors"
-                            title="Hapus Akun Pengguna"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          <div className="flex justify-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditUser(user)}
+                              className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition-colors"
+                              title="Edit Akun Pengguna"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteUser(user.id, user.username)}
+                              className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-colors"
+                              title="Hapus Akun Pengguna"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -1026,7 +1094,7 @@ export default function SettingsPage() {
               <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <UserPlus className="h-5 w-5 text-amber-500" />
-                  Buatkan Akun Pengguna Baru
+                  {editingUserId ? "Edit Akun Pengguna" : "Buatkan Akun Pengguna Baru"}
                 </h3>
                 <button
                   onClick={() => setIsUserModalOpen(false)}
@@ -1074,11 +1142,13 @@ export default function SettingsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 dark:text-slate-300 mb-1">Kata Sandi (Password)</label>
+                  <label className="block text-slate-700 dark:text-slate-300 mb-1">
+                    Kata Sandi (Password) {editingUserId && <span className="text-slate-400 font-normal">(Kosongkan jika tidak diubah)</span>}
+                  </label>
                   <div className="relative">
                     <input
                       type={showPassword ? "text" : "password"}
-                      required
+                      required={!editingUserId}
                       placeholder="••••••••"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
@@ -1122,7 +1192,7 @@ export default function SettingsPage() {
                     type="submit"
                     className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95"
                   >
-                    Simpan & Buat Akun
+                    {editingUserId ? "Simpan Perubahan" : "Simpan & Buat Akun"}
                   </button>
                 </div>
               </form>

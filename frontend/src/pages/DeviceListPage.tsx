@@ -377,26 +377,32 @@ export default function DeviceListPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-700 dark:text-slate-300 mb-1">Kategori Site</label>
-                    <select
+                    <input
+                      list="site-categories"
                       value={formData.siteCategory}
                       onChange={(e) => setFormData({ ...formData, siteCategory: e.target.value as NetworkDevice["siteCategory"] })}
+                      placeholder="Pilih atau Ketik Baru..."
                       className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-slate-100"
-                    >
+                    />
+                    <datalist id="site-categories">
                       <option value="BatuahSite">Batuah Site (Mining)</option>
                       <option value="HeadOffice">Head Office Jakarta</option>
                       <option value="JettyPort">Jetty / Port</option>
                       <option value="MessPalangkaraya">Hub Palangkaraya</option>
                       <option value="MessBuntok">Hub Buntok</option>
-                    </select>
+                    </datalist>
                   </div>
 
                   <div>
                     <label className="block text-slate-700 dark:text-slate-300 mb-1">Tipe Device</label>
-                    <select
+                    <input
+                      list="device-types"
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as NetworkDevice["type"] })}
+                      placeholder="Pilih atau Ketik Baru..."
                       className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-slate-100"
-                    >
+                    />
+                    <datalist id="device-types">
                       <option value="router">Router</option>
                       <option value="switch">Switch</option>
                       <option value="radio">Radio Link / PTP</option>
@@ -409,7 +415,7 @@ export default function DeviceListPage() {
                       <option value="smarttv">Smart TV Display</option>
                       <option value="cctv">CCTV NVR / Camera</option>
                       <option value="ups">UPS Power Unit</option>
-                    </select>
+                    </datalist>
                   </div>
                 </div>
 
