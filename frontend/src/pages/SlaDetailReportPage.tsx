@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FileText, Download, Calendar, CheckCircle2, Activity, Server, Cpu, Clock, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SITES_TAB_CONFIG } from "@/lib/constants";
 import BandwidthUsageChart from "@/components/dashboard/BandwidthUsageChart";
 
 interface SlaReportRow {
