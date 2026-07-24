@@ -161,6 +161,11 @@ export default function DeviceListPage() {
       .map((cat) => ({ id: cat, label: cat })),
   ];
 
+  const uniqueSiteCategories = Array.from(new Set([
+    ...SITES_CONFIG.map(s => s.id),
+    ...devices.map(d => d.siteCategory)
+  ]));
+
   const uniqueDeviceTypes = Array.from(new Set([
     "router", "switch", "radio", "ap", "firewall", "server", "nas", "fingerprint", "printer", "smarttv", "cctv", "ups",
     ...devices.map(d => d.type)
