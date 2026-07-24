@@ -134,70 +134,71 @@ ${filteredSlaRows.map((r) => `${r.interfaceName}: ${r.availabilityPct}% (Target 
   };
 
   return (
-    <div className="w-full max-w-none px-6 py-4 space-y-8 pb-16">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <FileText className="h-6 w-6 text-amber-500" />
-            SLA Detail & Infrastructure Performance Report
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">Comprehensive Uptime, Public Latency Metrics, & Outage Root Cause Analysis</p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Site Selector Tabs */}
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl text-xs font-semibold">
-            <Building2 className="h-4 w-4 text-slate-400 ml-2" />
-            {SITES_REPORT_CONFIG.map((site) => (
-              <button
-                key={site.id}
-                onClick={() => setActiveSite(site.id)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg transition-colors",
-                  activeSite === site.id
-                    ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                )}
-              >
-                {site.label}
-              </button>
-            ))}
+    <div className="w-full max-w-none px-6 py-4 space-y-6 pb-16">
+      {/* Sticky Header */}
+      <div className="sticky -top-6 -mx-12 px-12 pt-6 pb-4 z-30 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <FileText className="h-6 w-6 text-amber-500" />
+              SLA Detail & Infrastructure Performance Report
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400">Comprehensive Uptime, Public Latency Metrics, & Outage Root Cause Analysis</p>
           </div>
 
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl text-xs font-semibold">
-            <Calendar className="h-4 w-4 text-slate-400 ml-2" />
-            {(["weekly", "monthly", "yearly"] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg capitalize transition-colors",
-                  period === p ? "bg-amber-500 text-slate-950 font-bold shadow-xs" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                )}
-              >
-                {p}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Site Selector Tabs */}
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl text-xs font-semibold">
+              <Building2 className="h-4 w-4 text-slate-400 ml-2" />
+              {SITES_REPORT_CONFIG.map((site) => (
+                <button
+                  key={site.id}
+                  onClick={() => setActiveSite(site.id)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg transition-colors",
+                    activeSite === site.id
+                      ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  )}
+                >
+                  {site.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl text-xs font-semibold">
+              <Calendar className="h-4 w-4 text-slate-400 ml-2" />
+              {(["weekly", "monthly", "yearly"] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriod(p)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg capitalize transition-colors",
+                    period === p ? "bg-amber-500 text-slate-950 font-bold shadow-xs" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  )}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => handleExport("csv")}
+              disabled={isExporting}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl shadow-xs transition-all active:scale-95 text-xs"
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </button>
+            <button
+              onClick={() => handleExport("pdf")}
+              disabled={isExporting}
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl shadow-xs transition-all active:scale-95 text-xs"
+            >
+              <Download className="h-4 w-4" />
+              Export PDF
+            </button>
           </div>
-
-          <button
-            onClick={() => handleExport("csv")}
-            disabled={isExporting}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl shadow-xs transition-all active:scale-95 text-xs"
-          >
-            <Download className="h-4 w-4" />
-            Export CSV
-          </button>
-
-          <button
-            onClick={() => handleExport("pdf")}
-            disabled={isExporting}
-            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-xl shadow-xs transition-all active:scale-95 text-xs"
-          >
-            <Download className="h-4 w-4" />
-            Export PDF
-          </button>
         </div>
       </div>
 

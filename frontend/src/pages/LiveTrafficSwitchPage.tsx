@@ -128,46 +128,49 @@ export default function LiveTrafficSwitchPage() {
 
   return (
     <div className="w-full max-w-none px-6 py-4 space-y-6">
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <LayoutGrid className="h-6 w-6 text-amber-500" />
-            Live Traffic Switch Monitor
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">Core & Branch Switch Port Bandwidth Monitoring</p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Multi-Site Selector Tabs */}
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl text-xs font-semibold">
-            <Building2 className="h-4 w-4 text-slate-400 ml-2" />
-            {SWITCH_SITES.map((site) => (
-              <button
-                key={site.id}
-                onClick={() => setSelectedSiteId(site.id)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg transition-colors",
-                  selectedSiteId === site.id
-                    ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                )}
-              >
-                {site.name.split(" ")[0]} Site
-              </button>
-            ))}
+      {/* Sticky Header */}
+      <div className="sticky -top-6 -mx-12 px-12 pt-6 pb-4 z-30 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <LayoutGrid className="h-6 w-6 text-amber-500" />
+              Live Traffic Switch Monitor
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400">Core & Branch Switch Port Bandwidth Monitoring</p>
           </div>
+          
+          <div className="flex items-center gap-3">
+            {/* Multi-Site Selector Tabs */}
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 rounded-xl text-xs font-semibold">
+              <Building2 className="h-4 w-4 text-slate-400 ml-2" />
+              {SWITCH_SITES.map((site) => (
+                <button
+                  key={site.id}
+                  onClick={() => setSelectedSiteId(site.id)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg transition-colors",
+                    selectedSiteId === site.id
+                      ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  )}
+                >
+                  {site.name.split(" ")[0]} Site
+                </button>
+              ))}
+            </div>
 
-          <div className="hidden sm:flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-2 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <Server className="h-4 w-4 text-amber-500" />
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{activeSite.model}</span>
-              <span className="text-[11px] text-emerald-500 flex items-center gap-1 font-mono">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+            <div className="hidden sm:flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-4 py-2 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <Server className="h-5 w-5 text-amber-500" />
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{activeSite.model}</span>
+                <span className="text-[11px] text-emerald-500 flex items-center gap-1 font-mono">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                  </span>
+                  Online • {activeSite.ip}
                 </span>
-                Online • {activeSite.ip}
-              </span>
+              </div>
             </div>
           </div>
         </div>

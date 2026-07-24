@@ -32,75 +32,78 @@ export default function LiveEventsPage() {
   };
 
   return (
-    <div className="w-full max-w-none px-6 py-4 h-[calc(100vh-4rem)] flex flex-col space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <Zap className="h-6 w-6 text-amber-500" />
-            Live Event Log Real-Time Stream
-            <span className="relative flex h-3 w-3 ml-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
-            </span>
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">Total {events.length} real-time synchronized events logged</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Export Syslog Log & Audio Test Controls */}
-          <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold">
-            <Volume2 className="h-4 w-4 text-amber-500 ml-1" />
-            <button
-              onClick={() => playDownSound()}
-              className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 font-bold transition-all active:scale-95"
-              title="Uji coba suara alarm perangkat DOWN (3x Teeet)"
-            >
-              Test Down Sound
-            </button>
-            <button
-              onClick={() => playUpSound()}
-              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 font-bold transition-all active:scale-95"
-              title="Uji coba suara notifikasi perangkat UP (1x Tiiiing)"
-            >
-              Test Up Sound
-            </button>
-            <button
-              onClick={() => {
-                const logData = events
-                  .map((e) => `[${new Date(e.timestamp).toISOString()}] [${e.severity.toUpperCase()}] [${e.source}] ${e.message}`)
-                  .join("\n");
-                const blob = new Blob([logData], { type: "text/plain" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `MNOP_Syslog_Collector_${new Date().toISOString().slice(0, 10)}.log`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-              }}
-              className="px-2.5 py-1 rounded-lg bg-sky-500 text-white font-bold transition-all active:scale-95 ml-1"
-            >
-              Export Syslog Log (.log)
-            </button>
+    <div className="w-full max-w-none px-6 py-4 space-y-6 flex flex-col h-[calc(100vh-5rem)]">
+      {/* Sticky Header */}
+      <div className="sticky -top-6 -mx-12 px-12 pt-6 pb-4 z-30 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <Zap className="h-6 w-6 text-amber-500" />
+              Live Event Log Real-Time Stream
+              <span className="relative flex h-3 w-3 ml-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+              </span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400">Total {events.length} real-time synchronized events logged</p>
           </div>
 
-          <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-            <Filter className="h-4 w-4 text-slate-400 ml-2" />
-            {(["All", "info", "warning", "error", "critical"] as const).map((s) => (
+          <div className="flex items-center gap-3">
+            {/* Export Syslog Log & Audio Test Controls */}
+            <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold">
+              <Volume2 className="h-4 w-4 text-amber-500 ml-1" />
               <button
-                key={s}
-                onClick={() => setFilter(s)}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors capitalize",
-                  filter === s
-                    ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                )}
+                onClick={() => playDownSound()}
+                className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 font-bold transition-all active:scale-95"
+                title="Uji coba suara alarm perangkat DOWN (3x Teeet)"
               >
-                {s}
+                Test Down Sound
               </button>
-            ))}
+              <button
+                onClick={() => playUpSound()}
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 font-bold transition-all active:scale-95"
+                title="Uji coba suara notifikasi perangkat UP (1x Tiiiing)"
+              >
+                Test Up Sound
+              </button>
+              <button
+                onClick={() => {
+                  const logData = events
+                    .map((e) => `[${new Date(e.timestamp).toISOString()}] [${e.severity.toUpperCase()}] [${e.source}] ${e.message}`)
+                    .join("\n");
+                  const blob = new Blob([logData], { type: "text/plain" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `MNOP_Syslog_Collector_${new Date().toISOString().slice(0, 10)}.log`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }}
+                className="px-2.5 py-1 rounded-lg bg-sky-500 text-white font-bold transition-all active:scale-95 ml-1"
+              >
+                Export Syslog Log (.log)
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+              <Filter className="h-4 w-4 text-slate-400 ml-2" />
+              {(["All", "info", "warning", "error", "critical"] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setFilter(s)}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors capitalize",
+                    filter === s
+                      ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                      : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
