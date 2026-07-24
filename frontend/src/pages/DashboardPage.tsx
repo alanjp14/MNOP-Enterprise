@@ -13,6 +13,7 @@ import { PingLatencyCard } from "@/components/dashboard/PingLatencyCard";
 import { LiveEventFeed } from "@/components/dashboard/LiveEventFeed";
 import { ActiveDevicesSummary } from "@/components/dashboard/ActiveDevicesSummary";
 import { ResourceGauge } from "@/components/dashboard/ResourceGauge";
+import BandwidthUsageChart from "@/components/dashboard/BandwidthUsageChart";
 
 // Framer Motion Variants
 const containerVariants: Variants = {
@@ -586,13 +587,16 @@ export default function DashboardPage() {
       </motion.section>
 
       {/* ═══════════════════════════════════════════════════════════
-          ROW 6: Live Events (10 items) + Active Network Devices
+          ROW 6: Live Events, Bandwidth Usage & Active Network Devices
       ═══════════════════════════════════════════════════════════ */}
-      <motion.section variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <motion.section variants={itemVariants} className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div className="xl:col-span-1">
           <LiveEventFeed events={events} maxVisible={10} />
         </div>
-        <div className="lg:col-span-1">
+        <div className="xl:col-span-2">
+          <BandwidthUsageChart title="Bandwidth Usage (All Links)" />
+        </div>
+        <div className="xl:col-span-1">
           <ActiveDevicesSummary
             totalDevices={currentSite.devices.length}
             onlineDevices={currentSite.devices.filter((d) => d.status === "up").length}

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { SlaGaugeCard } from "@/components/dashboard/SlaGaugeCard";
+import BandwidthUsageChart from "@/components/dashboard/BandwidthUsageChart";
 import { BarChart3, ShieldCheck, CheckCircle2, AlertCircle, ArrowUpRight, Globe, Server, Radio, Network, Building2, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -237,6 +239,11 @@ export default function SlaOverviewPage() {
           })}
         </div>
       </div>
+
+      {/* Bandwidth Usage Section */}
+      <motion.div variants={itemVariants} className="w-full">
+        <BandwidthUsageChart title={`Bandwidth Usage (${activeSiteTab === "ALL" ? "Semua Lokasi Site" : SITES_TAB_CONFIG.find(t => t.id === activeSiteTab)?.label})`} />
+      </motion.div>
 
       {/* Multi-Site Comparative SLA Benchmark Matrix */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
