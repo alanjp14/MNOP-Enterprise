@@ -257,91 +257,94 @@ export default function SettingsPage() {
 
   return (
     <div className="w-full max-w-none px-6 py-4 space-y-6 pb-16">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            <SettingsIcon className="h-6 w-6 text-amber-500" />
-            NOC System & Enterprise Monitoring Configuration Portal
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">Pengaturan Organisasi, Ambang Batas SLA, Parameter Monitoring, & Notifikasi Alarm</p>
+      {/* Sticky Header & Navigation Tabs */}
+      <div className="sticky -top-6 -mx-12 px-12 pt-6 pb-4 z-30 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs space-y-4">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <SettingsIcon className="h-6 w-6 text-amber-500" />
+              NOC System & Enterprise Monitoring Configuration Portal
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400">Pengaturan Organisasi, Ambang Batas SLA, Parameter Monitoring, & Notifikasi Alarm</p>
+          </div>
+
+          <button
+            onClick={handleSave}
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 text-xs"
+          >
+            {savedSuccess ? <Check className="h-4 w-4 text-slate-950" /> : <Save className="h-4 w-4" />}
+            {savedSuccess ? "Konfigurasi Berhasil Disimpan!" : "Simpan Semua Konfigurasi"}
+          </button>
         </div>
 
-        <button
-          onClick={handleSave}
-          className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 text-xs"
-        >
-          {savedSuccess ? <Check className="h-4 w-4 text-slate-950" /> : <Save className="h-4 w-4" />}
-          {savedSuccess ? "Konfigurasi Berhasil Disimpan!" : "Simpan Semua Konfigurasi"}
-        </button>
-      </div>
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-2 text-xs font-bold overflow-x-auto pb-1">
+          <button
+            onClick={() => setActiveTab("org")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
+              activeTab === "org"
+                ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            )}
+          >
+            <Building2 className="h-4 w-4" />
+            Organisasi & Multi-Site
+          </button>
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-xs font-bold overflow-x-auto">
-        <button
-          onClick={() => setActiveTab("org")}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
-            activeTab === "org"
-              ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-          )}
-        >
-          <Building2 className="h-4 w-4" />
-          Organisasi & Multi-Site
-        </button>
+          <button
+            onClick={() => setActiveTab("probes")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
+              activeTab === "probes"
+                ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            )}
+          >
+            <Sliders className="h-4 w-4" />
+            Ambang Batas & Target SLA
+          </button>
 
-        <button
-          onClick={() => setActiveTab("probes")}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
-            activeTab === "probes"
-              ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-          )}
-        >
-          <Sliders className="h-4 w-4" />
-          Ambang Batas & Target SLA
-        </button>
+          <button
+            onClick={() => setActiveTab("audio")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
+              activeTab === "audio"
+                ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            )}
+          >
+            <Volume2 className="h-4 w-4" />
+            Alarm Bersuara & Notifikasi
+          </button>
 
-        <button
-          onClick={() => setActiveTab("audio")}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
-            activeTab === "audio"
-              ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-          )}
-        >
-          <Volume2 className="h-4 w-4" />
-          Alarm Bersuara & Notifikasi
-        </button>
+          <button
+            onClick={() => setActiveTab("security")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
+              activeTab === "security"
+                ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            )}
+          >
+            <Shield className="h-4 w-4" />
+            Keamanan & Integrasi API
+          </button>
 
-        <button
-          onClick={() => setActiveTab("security")}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
-            activeTab === "security"
-              ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-          )}
-        >
-          <Shield className="h-4 w-4" />
-          Keamanan & Integrasi API
-        </button>
-
-        <button
-          onClick={() => setActiveTab("users")}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
-            activeTab === "users"
-              ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
-              : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-          )}
-        >
-          <Users className="h-4 w-4" />
-          Manajemen Pengguna & Hak Akses (RBAC)
-        </button>
+          <button
+            onClick={() => setActiveTab("users")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all whitespace-nowrap",
+              activeTab === "users"
+                ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
+                : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+            )}
+          >
+            <Users className="h-4 w-4" />
+            Manajemen Pengguna & Hak Akses (RBAC)
+          </button>
+        </div>
       </div>
 
       {userActionMsg && (
