@@ -135,6 +135,7 @@ export default function SettingsPage() {
     }
     
     if (editingUserId) {
+      let isUpdatedOnBackend = false;
       try {
         await updateUser(editingUserId, {
           full_name: newFullName,
@@ -142,7 +143,21 @@ export default function SettingsPage() {
           role: newRole,
           ...(newPassword ? { password: newPassword } : {})
         });
+        isUpdatedOnBackend = true;
       } catch {}
+
+      if (!isUpdatedOnBackend && newPassword) {
+        try {
+          await createUser({
+            full_name: newFullName,
+            username: newUsername,
+            email: newEmail,
+            password: newPassword,
+            role: newRole,
+          });
+        } catch {}
+      }
+
       const updated = userList.map(u => u.id === editingUserId ? {
         ...u,
         full_name: newFullName,

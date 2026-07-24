@@ -14,10 +14,14 @@ from app.schemas.auth import (
     UserUpdateRequest,
 )
 
+import json
+from pathlib import Path
+
 router = APIRouter(prefix="/auth", tags=["Authentication & User Management"])
 
-# Fallback Mock Users for Development/Testing without DB seed
-MOCK_USERS = {
+MOCK_USERS_FILE = Path(__file__).parent / "mock_users_store.json"
+
+DEFAULT_MOCK_USERS = {
     "usr-1": {
         "id": "usr-1",
         "username": "admin_kbu",
@@ -49,6 +53,27 @@ MOCK_USERS = {
         "is_active": True,
     },
 }
+
+
+def _load_mock_users() -> dict:
+    if MOCK_USERS_FILE.exists():
+        try:
+            with open(MOCK_USERS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return DEFAULT_MOCK_USERS.copy()
+
+
+def _save_mock_users(data: dict) -> None:
+    try:
+        with open(MOCK_USERS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
+
+
+MOCK_USERS = _load_mock_users()
 
 
 @router.get("/users", response_model=list[UserResponse], summary="Daftar Seluruh Akun Pengguna")
@@ -106,6 +131,7 @@ async def create_user(
         "is_active": True,
     }
     MOCK_USERS[user_id] = new_user_data
+    _save_mock_users(MOCK_USERS)
 
     return UserResponse(
         id=user_id,
@@ -138,6 +164,8 @@ async def update_user(
         if user_in.password:
             u["password_hash"] = get_password_hash(user_in.password)
 
+        _save_mock_users(MOCK_USERS)
+
         return UserResponse(
             id=u["id"],
             username=u["username"],
@@ -156,6 +184,7 @@ async def delete_user(user_id: str, db: AsyncSession = Depends(get_db_session)) 
     """Delete or deactivate user account."""
     if user_id in MOCK_USERS:
         del MOCK_USERS[user_id]
+        _save_mock_users(MOCK_USERS)
         return {"message": f"Akun pengguna {user_id} berhasil dihapus"}
 
     raise HTTPException(status_code=404, detail="Pengguna tidak ditemukan")
