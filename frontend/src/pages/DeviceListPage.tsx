@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { Server, Plus, Edit2, Trash2, ShieldCheck, Search, X, Check, Building2, HardDrive, Printer, Tv, Video, Zap, Fingerprint, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,11 @@ export default function DeviceListPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDevice, setEditingDevice] = useState<NetworkDevice | null>(null);
+  const [deleteConfirmState, setDeleteConfirmState] = useState<{ isOpen: boolean; deviceId: string; deviceName: string }>({
+    isOpen: false,
+    deviceId: "",
+    deviceName: "",
+  });
 
   // Form State
   const [formData, setFormData] = useState<Omit<NetworkDevice, "id">>({
@@ -103,16 +109,26 @@ export default function DeviceListPage() {
     } catch {}
   };
 
-  const handleDeleteDevice = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus device ini dari inventory?")) {
-      try {
-        await deviceService.deleteDevice(id);
-      } catch (err) {
-        console.warn("Backend delete API warning:", err);
-      }
-      const updated = devices.filter((d) => d.id !== id);
-      updateAndSaveDevices(updated);
+  const handleDeleteDevice = (id: string) => {
+    const targetDev = devices.find((d) => d.id === id);
+    setDeleteConfirmState({
+      isOpen: true,
+      deviceId: id,
+      deviceName: targetDev ? targetDev.name : "Device ini",
+    });
+  };
+
+  const confirmDeleteDevice = async () => {
+    const { deviceId } = deleteConfirmState;
+    if (!deviceId) return;
+    try {
+      await deviceService.deleteDevice(deviceId);
+    } catch (err) {
+      console.warn("Backend delete API warning:", err);
     }
+    const updated = devices.filter((d) => d.id !== deviceId);
+    updateAndSaveDevices(updated);
+    setDeleteConfirmState({ isOpen: false, deviceId: "", deviceName: "" });
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -529,6 +545,18 @@ export default function DeviceListPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Modern Confirmation Modal for Device Deletion */}
+      <ConfirmModal
+        isOpen={deleteConfirmState.isOpen}
+        onClose={() => setDeleteConfirmState({ isOpen: false, deviceId: "", deviceName: "" })}
+        onConfirm={confirmDeleteDevice}
+        title="Hapus Perangkat Inventory"
+        message={`Apakah Anda yakin ingin menghapus perangkat "${deleteConfirmState.deviceName}" dari daftar inventaris jaringan? Perangkat yang dihapus tidak lagi dipantau oleh NOC.`}
+        confirmText="Ya, Hapus Perangkat"
+        cancelText="Batal"
+        type="danger"
+      />
     </div>
   );
 }

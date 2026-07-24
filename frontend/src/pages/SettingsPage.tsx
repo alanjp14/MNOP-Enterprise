@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Settings as SettingsIcon,
@@ -86,6 +87,11 @@ export default function SettingsPage() {
   const [newRole, setNewRole] = useState<"Administrator" | "NOC Operator" | "User Only">("NOC Operator");
   const [userActionMsg, setUserActionMsg] = useState("");
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [deleteConfirmState, setDeleteConfirmState] = useState<{ isOpen: boolean; userId: string; username: string }>({
+    isOpen: false,
+    userId: "",
+    username: "",
+  });
 
   const handleOpenEditUser = (user: UserAccount) => {
     setEditingUserId(user.id);
@@ -205,17 +211,23 @@ export default function SettingsPage() {
     setTimeout(() => setUserActionMsg(""), 3500);
   };
 
-  const handleDeleteUser = async (id: string, username: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus akun ${username}?`)) return;
+  const handleDeleteUser = (id: string, username: string) => {
+    setDeleteConfirmState({ isOpen: true, userId: id, username });
+  };
+
+  const confirmDeleteUser = async () => {
+    const { userId, username } = deleteConfirmState;
+    if (!userId) return;
     try {
-      await deleteUser(id);
+      await deleteUser(userId);
     } catch {
       // fallback local
     }
-    const updated = userList.filter((u) => u.id !== id);
+    const updated = userList.filter((u) => u.id !== userId);
     updateAndSaveUsers(updated);
     setUserActionMsg(`Akun ${username} telah dihapus.`);
     setTimeout(() => setUserActionMsg(""), 3500);
+    setDeleteConfirmState({ isOpen: false, userId: "", username: "" });
   };
 
   const handleToggleRole = async (id: string, currentRole: string) => {
@@ -1218,6 +1230,18 @@ export default function SettingsPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Modern Confirmation Modal for User Deletion */}
+      <ConfirmModal
+        isOpen={deleteConfirmState.isOpen}
+        onClose={() => setDeleteConfirmState({ isOpen: false, userId: "", username: "" })}
+        onConfirm={confirmDeleteUser}
+        title="Hapus Akun Pengguna"
+        message={`Apakah Anda yakin ingin menghapus akun "${deleteConfirmState.username}"? Akses pengguna ini ke sistem NOC akan dicabut secara permanen.`}
+        confirmText="Ya, Hapus Akun"
+        cancelText="Batal"
+        type="danger"
+      />
     </div>
   );
 }
