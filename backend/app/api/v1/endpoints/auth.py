@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -132,6 +133,16 @@ async def create_user(
     }
     MOCK_USERS[user_id] = new_user_data
     _save_mock_users(MOCK_USERS)
+
+    # ---------------------------------------------------------
+    # SIMULATE ENTERPRISE EMAIL SENDING
+    # ---------------------------------------------------------
+    logging.info(f"Triggering email notification for new user: {new_user_data['email']}")
+    logging.info(f"Subject: [NOC] Selamat Datang di NOC System - Kredensial Akses Anda")
+    logging.info(f"To: {new_user_data['email']}")
+    logging.info(f"Content: Enterprise Email Template (Refer to Email_Template_Enterprise.html for the HTML structure)")
+    # In a real app, this would use a background task with an SMTP client (like aiosmtplib) or an API (SendGrid/Postmark).
+    # ---------------------------------------------------------
 
     return UserResponse(
         id=user_id,

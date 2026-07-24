@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { useToast } from "@/contexts/ToastContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Settings as SettingsIcon,
@@ -85,7 +86,7 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [newRole, setNewRole] = useState<"Administrator" | "NOC Operator" | "User Only">("NOC Operator");
-  const [userActionMsg, setUserActionMsg] = useState("");
+  const { showToast } = useToast();
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [deleteConfirmState, setDeleteConfirmState] = useState<{ isOpen: boolean; userId: string; username: string }>({
     isOpen: false,
@@ -172,7 +173,7 @@ export default function SettingsPage() {
         role: newRole,
       } : u);
       updateAndSaveUsers(updated);
-      setUserActionMsg(`Akun ${newUsername} berhasil diperbarui!`);
+      showToast(`Akun ${newUsername} berhasil diperbarui!`, "success");
     } else {
       let createdUser: UserAccount;
       try {
@@ -197,7 +198,7 @@ export default function SettingsPage() {
 
       const updated = [...userList, createdUser];
       updateAndSaveUsers(updated);
-      setUserActionMsg(`Akun ${newUsername} (${newRole}) berhasil dibuat!`);
+      showToast(`Akun ${newUsername} (${newRole}) berhasil dibuat!`, "success");
     }
 
     setIsUserModalOpen(false);
@@ -208,7 +209,6 @@ export default function SettingsPage() {
     setNewPassword("");
     setShowPassword(false);
     setNewRole("NOC Operator");
-    setTimeout(() => setUserActionMsg(""), 3500);
   };
 
   const handleDeleteUser = (id: string, username: string) => {
@@ -225,8 +225,7 @@ export default function SettingsPage() {
     }
     const updated = userList.filter((u) => u.id !== userId);
     updateAndSaveUsers(updated);
-    setUserActionMsg(`Akun ${username} telah dihapus.`);
-    setTimeout(() => setUserActionMsg(""), 3500);
+    showToast(`Akun ${username} telah dihapus.`, "success");
     setDeleteConfirmState({ isOpen: false, userId: "", username: "" });
   };
 
@@ -241,8 +240,7 @@ export default function SettingsPage() {
     }
     const updated = userList.map((u) => (u.id === id ? { ...u, role: nextRole } : u));
     updateAndSaveUsers(updated);
-    setUserActionMsg(`Hak akses pengguna berhasil diubah ke ${nextRole}`);
-    setTimeout(() => setUserActionMsg(""), 3500);
+    showToast(`Hak akses pengguna berhasil diubah ke ${nextRole}`, "success");
   };
 
 
@@ -373,14 +371,6 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
-
-      {userActionMsg && (
-        <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-bold text-xs rounded-xl flex items-center gap-2">
-          <UserCheck className="h-4 w-4" />
-          {userActionMsg}
-        </div>
-      )}
-
 
       {/* Tab Contents */}
       <AnimatePresence mode="wait">

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selamat Datang di Sistem NOC</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            color: #334155;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            padding: 32px 24px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+        .header p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 32px 24px;
+        }
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 16px;
+        }
+        .message {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .credentials-box {
+            background-color: #f1f5f9;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 24px;
+        }
+        .credential-item {
+            margin-bottom: 12px;
+        }
+        .credential-item:last-child {
+            margin-bottom: 0;
+        }
+        .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+            font-family: monospace;
+        }
+        .action-container {
+            text-align: center;
+            margin: 32px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #f59e0b;
+            color: #ffffff;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            background-color: #d97706;
+        }
+        .security-notice {
+            background-color: #fff1f2;
+            border: 1px solid #fecdd3;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .security-title {
+            color: #e11d48;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .security-text {
+            color: #be123c;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .footer {
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .footer p {
+            margin: 0 0 8px 0;
+        }
+        .footer .confidential {
+            font-weight: 600;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Akses Portal NOC System</h1>
+            <p>PT Kapuas Bara Utama</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">Halo, {{full_name}}</div>
+            
+            <div class="message">
+                Akun Anda telah berhasil didaftarkan oleh Administrator ke dalam sistem <strong>Network Operations Center (NOC) & Enterprise Monitoring Configuration Portal</strong>. 
+                Sistem ini digunakan untuk memantau perangkat jaringan dan infrastruktur secara real-time.
+            </div>
+            
+            <div class="credentials-box">
+                <div class="credential-item">
+                    <div class="label">Hak Akses (Role)</div>
+                    <div class="value" style="font-family: inherit; color: #f59e0b;">{{role}}</div>
+                </div>
+                <div class="credential-item">
+                    <div class="label">Username Login</div>
+                    <div class="value">{{username}}</div>
+                </div>
+                <div class="credential-item">
+                    <div class="label">Kata Sandi Sementara</div>
+                    <div class="value">{{temporary_password}}</div>
+                </div>
+            </div>
+
+            <div class="action-container">
+                <a href="http://192.168.20.2:5173/login" class="button">Masuk ke NOC Portal</a>
+            </div>
+
+            <div class="security-notice">
+                <div class="security-title">
+                    ⚠️ Peringatan Keamanan Internal
+                </div>
+                <p class="security-text">
+                    Email ini berisi informasi kredensial yang bersifat rahasia. Jangan pernah membagikan username atau kata sandi Anda kepada siapapun. Sangat disarankan untuk segera mengubah kata sandi sementara Anda setelah berhasil masuk pertama kali ke dalam sistem.
+                </p>
+            </div>
+            
+            <div class="message" style="font-size: 13px; color: #64748b; margin-bottom: 0;">
+                Jika Anda merasa tidak seharusnya menerima email ini atau memiliki pertanyaan lebih lanjut, silakan hubungi Tim IT / Administrator Jaringan PT Kapuas Bara Utama.
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p class="confidential">CONFIDENTIALITY NOTICE</p>
+            <p>Email ini dihasilkan otomatis oleh sistem. Mohon untuk tidak membalas email ini.</p>
+            <p>&copy; 2026 PT Kapuas Bara Utama. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
