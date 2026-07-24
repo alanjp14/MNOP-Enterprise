@@ -25,7 +25,13 @@ const INITIAL_FALLBACK_DEVICES: NetworkDevice[] = [
 ];
 
 export default function DeviceListPage() {
-  const [devices, setDevices] = useState<NetworkDevice[]>(INITIAL_FALLBACK_DEVICES);
+  const [devices, setDevices] = useState<NetworkDevice[]>(() => {
+    try {
+      const saved = localStorage.getItem("mnop_devices");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return INITIAL_FALLBACK_DEVICES;
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSiteFilter, setActiveSiteFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
@@ -90,6 +96,13 @@ export default function DeviceListPage() {
     setIsModalOpen(true);
   };
 
+  const updateAndSaveDevices = (newDevices: NetworkDevice[]) => {
+    setDevices(newDevices);
+    try {
+      localStorage.setItem("mnop_devices", JSON.stringify(newDevices));
+    } catch {}
+  };
+
   const handleDeleteDevice = async (id: string) => {
     if (confirm("Apakah Anda yakin ingin menghapus device ini dari inventory?")) {
       try {
@@ -97,7 +110,8 @@ export default function DeviceListPage() {
       } catch (err) {
         console.warn("Backend delete API warning:", err);
       }
-      setDevices((prev) => prev.filter((d) => d.id !== id));
+      const updated = devices.filter((d) => d.id !== id);
+      updateAndSaveDevices(updated);
     }
   };
 
@@ -105,15 +119,14 @@ export default function DeviceListPage() {
     e.preventDefault();
     if (!formData.name || !formData.ip) return;
 
+    let updatedDevices: NetworkDevice[];
     if (editingDevice) {
       try {
         await deviceService.updateDevice(editingDevice.id, formData);
       } catch (err) {
         console.warn("Backend update API warning:", err);
       }
-      setDevices((prev) =>
-        prev.map((d) => (d.id === editingDevice.id ? { ...formData, id: editingDevice.id } : d))
-      );
+      updatedDevices = devices.map((d) => (d.id === editingDevice.id ? { ...formData, id: editingDevice.id } : d));
     } else {
       let newDev: NetworkDevice;
       try {
@@ -122,8 +135,9 @@ export default function DeviceListPage() {
         console.warn("Backend create API warning:", err);
         newDev = { ...formData, id: `dev-${Date.now()}` };
       }
-      setDevices((prev) => [...prev, newDev]);
+      updatedDevices = [...devices, newDev];
     }
+    updateAndSaveDevices(updatedDevices);
     setIsModalOpen(false);
   };
 
@@ -139,11 +153,13 @@ export default function DeviceListPage() {
     return matchesSite && matchesSearch;
   });
 
-  // Extract unique site categories and device types for autocomplete
-  const uniqueSiteCategories = Array.from(new Set([
-    ...SITES_CONFIG.filter(s => s.id !== "ALL").map(s => s.id),
-    ...devices.map(d => d.siteCategory)
-  ]));
+  // Dynamically compute site filter tabs from SITES_CONFIG + any custom siteCategory in devices state
+  const dynamicSiteTabs = [
+    ...SITES_CONFIG,
+    ...Array.from(new Set(devices.map((d) => d.siteCategory)))
+      .filter((cat) => cat && !SITES_CONFIG.some((s) => s.id === cat))
+      .map((cat) => ({ id: cat, label: cat })),
+  ];
 
   const uniqueDeviceTypes = Array.from(new Set([
     "router", "switch", "radio", "ap", "firewall", "server", "nas", "fingerprint", "printer", "smarttv", "cctv", "ups",
@@ -216,12 +232,12 @@ export default function DeviceListPage() {
           {/* Site Tabs */}
           <div className="flex flex-wrap items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl text-xs font-semibold border border-slate-200/80 dark:border-slate-800">
             <Building2 className="h-4 w-4 text-slate-400 ml-2 mr-1" />
-            {SITES_CONFIG.map((site) => (
+            {dynamicSiteTabs.map((site) => (
               <button
                 key={site.id}
                 onClick={() => setActiveSiteFilter(site.id)}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg transition-colors",
+                  "px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap",
                   activeSiteFilter === site.id
                     ? "bg-amber-500 text-slate-950 font-bold shadow-xs"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
