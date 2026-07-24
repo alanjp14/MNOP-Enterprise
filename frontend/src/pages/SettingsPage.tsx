@@ -18,7 +18,6 @@ import {
   Sliders,
   Users,
   UserPlus,
-  UserCheck,
   Trash2,
   X,
   Key,

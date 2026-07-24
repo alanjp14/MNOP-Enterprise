@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from "lucide-react";
-import { useToast, ToastMessage } from "@/contexts/ToastContext";
+import { useToast, type ToastMessage } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 
 const toastVariants = {
